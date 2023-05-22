@@ -2,22 +2,77 @@
 //  CoinManager.swift
 //  ByteCoin
 //
-//  Created by Angela Yu on 11/09/2019.
-//  Copyright © 2019 The App Brewery. All rights reserved.
+//  Created by ismail harmanda on 23.05.2023.
 //
 
 import Foundation
 
+protocol CoinManagerDelegate {
+    func didUpdateCoin(_ coinManager:CoinManager,coin:CoinModel)
+    func didFailWithError(error: Error)
+}
+
 struct CoinManager {
     
+    var delegate: CoinManagerDelegate?
+    
     let baseURL = "https://rest.coinapi.io/v1/exchangerate/BTC"
-    let apiKey = "YOUR_API_KEY_HERE"
+    let apiKey = "1F7F55CF-AB29-4829-9372-B78E017ED6D9"
     
-    let currencyArray = ["AUD", "BRL","CAD","CNY","EUR","GBP","HKD","IDR","ILS","INR","JPY","MXN","NOK","NZD","PLN","RON","RUB","SEK","SGD","USD","ZAR"]
+    let currencyArray: [String]
     
-    var selectedCurrency:String {return currencyArray[0]}
+    var selectedCurrency: String
 
-    func getCoinPrice(for currency: String) {
-        self.selectedCurrency=
+    init() {
+        currencyArray = ["AUD", "BRL","CAD","CNY","EUR","GBP","HKD","IDR","ILS","INR","JPY","MXN","NOK","NZD","PLN","RON","RUB","SEK","SGD","USD","ZAR"]
+        selectedCurrency = currencyArray[0]
     }
+
+     func getCoinPrice(for currency: String) {
+        let urlString = "\(baseURL)/\(currency)?apikey=\(apiKey)"
+        performRequest(with: urlString)
+    }
+    
+    func performRequest(with urlString: String){
+        
+        // 1. Create a URL
+        if let url = URL(string: urlString){
+            
+            // 2. Create a URLSession
+            let session = URLSession(configuration: .default)
+            
+            // 3. Give the session a task
+            let task = session.dataTask(with: url) { data, response, error in
+                
+                if error != nil {
+                    delegate?.didFailWithError(error: error!)
+                }
+                if let safeData = data {
+                    if let coin = self.parseJSON(safeData){
+                        delegate?.didUpdateCoin(self, coin: coin)
+                    }
+                }
+            }
+            // 4. Start the task
+            task.resume()
+        }
+    }
+    
+    func parseJSON(_ coinData: Data) -> CoinModel?{
+        let decoder = JSONDecoder()
+        do{
+           let decodedData = try decoder.decode(CoinData.self, from: coinData)
+            let asset_id_base = decodedData.asset_id_base
+            let asset_id_quote = decodedData.asset_id_quote
+            let rate = decodedData.rate
+            
+            let coin = CoinModel(asset_id_base: asset_id_base, asset_id_quote: asset_id_quote, rate: rate)
+            
+            return coin
+        }catch{
+            delegate?.didFailWithError(error: error)
+            return nil
+        }
+    }
+
 }

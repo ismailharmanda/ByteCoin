@@ -2,15 +2,47 @@
 //  ViewController.swift
 //  ByteCoin
 //
-//  Created by Angela Yu on 11/09/2019.
-//  Copyright © 2019 The App Brewery. All rights reserved.
+//  Created by ismail harmanda on 23.05.2023.
 //
 
 import UIKit
 
-class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDelegate {
+class ViewController: UIViewController {
     
     let coinManager = CoinManager()
+    
+    
+    @IBOutlet weak var bitcoinLabel: UILabel!
+    @IBOutlet weak var currencyLabel: UILabel!
+    @IBOutlet weak var currencyPicker: UIPickerView!
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        currencyPicker.dataSource = self
+        currencyPicker.delegate = self
+    }
+
+
+}
+
+//MARK: - CoinManagerDelegate
+
+extension ViewController: CoinManagerDelegate {
+    func didUpdateCoin(_ coinManager: CoinManager, coin: CoinModel) {
+        DispatchQueue.main.async{
+            self.bitcoinLabel.text=String(format: "%.2f", coin.rate)
+        }
+    }
+    
+    
+    func didFailWithError(error: Error) {
+        print(error)
+    }
+}
+
+//MARK: - UIPickerView DataSource & Delegate
+
+extension ViewController: UIPickerViewDataSource, UIPickerViewDelegate {
     
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
         return 1
@@ -29,18 +61,4 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         coinManager.getCoinPrice(for: selectedCurrency)
     }
     
-    
-    
-    @IBOutlet weak var bitcoinLabel: UILabel!
-    @IBOutlet weak var currencyLabel: UILabel!
-    @IBOutlet weak var currencyPicker: UIPickerView!
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        currencyPicker.dataSource = self
-        currencyPicker.delegate = self
-    }
-
-
 }
-
