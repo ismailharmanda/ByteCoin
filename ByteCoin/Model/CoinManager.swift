@@ -14,6 +14,10 @@ struct CoinManager {
     let apiKey = "YOUR_API_KEY_HERE"
     
     let currencyArray = ["AUD", "BRL","CAD","CNY","EUR","GBP","HKD","IDR","ILS","INR","JPY","MXN","NOK","NZD","PLN","RON","RUB","SEK","SGD","USD","ZAR"]
-
     
+    var selectedCurrency:String {return currencyArray[0]}
+
+    func getCoinPrice(for currency: String) {
+        self.selectedCurrency=
+    }
 }
