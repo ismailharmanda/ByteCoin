@@ -9,9 +9,9 @@ import Foundation
 
 struct CoinModel {
 
-    let asset_id_base:String
-    let asset_id_quote:String
-    let rate:Double
+    var asset_id_base:String
+    var asset_id_quote:String
+    var rate:Double
     
     init(asset_id_base: String, asset_id_quote: String, rate: Double) {
         self.asset_id_base = asset_id_base
